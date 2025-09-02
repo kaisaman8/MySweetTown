@@ -1,0 +1,45 @@
+workflows:
+  ios-build:
+    name: iOS Build
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.Workapp.SweetHome
+      xcode: latest
+      
+    integrations:
+      app_store_connect: "Codemagic API key"
+
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      
+      - name: Build iOS app
+        script: |
+          xcode-project build-ipa \
+            --project "SweetTown.xcodeproj" \
+            --scheme "SweetTown" \
+            --config "Release"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - /tmp/xcodebuild_archive/*.xcarchive
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # submit_to_app_store: true
