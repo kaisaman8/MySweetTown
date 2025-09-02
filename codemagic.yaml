@@ -3,7 +3,7 @@ workflows:
     name: iOS Build
     instance_type: mac_mini_m1
     max_build_duration: 60
-
+    
     triggering:
       events:
         - push
@@ -11,55 +11,89 @@ workflows:
         - pattern: main
           include: true
           source: true
-
+    
     integrations:
       app_store_connect: "Codemagic API key"
-
+    
     environment:
       vars:
         DEVELOPMENT_TEAM: $DEVELOPMENT_TEAM
         APP_IDENTIFIER: com.Workapp.SweetHome
-
+        BUNDLE_ID: com.Workapp.SweetHome
+        XCODE_WORKSPACE: "SweetTown.xcworkspace"
+        XCODE_SCHEME: "SweetTown"
+      
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: $APP_IDENTIFIER
-
+        bundle_identifier: com.Workapp.SweetHome
+      
       xcode: latest
       cocoapods: default
-
+    
     scripts:
       - name: Install dependencies
         script: |
+          # Обновляем gem и устанавливаем зависимости
           sudo gem install xcodeproj -v '>=1.8' || true
+          
+          # Устанавливаем CocoaPods зависимости
           if [ -f "Podfile" ]; then
-            pod install --repo-update
+            echo "Installing CocoaPods dependencies..."
+            pod install --repo-update --clean-install
+          else
+            echo "No Podfile found, skipping CocoaPods installation"
           fi
-
-      - name: Setup code signing
+      
+      - name: Setup Xcode project
         script: |
-          xcode-project use-profiles --project "SweetTown.xcodeproj" --scheme "SweetTown"
-
+          # Настраиваем автоматическое управление подписанием
+          if [ -f "$XCODE_WORKSPACE" ]; then
+            PROJECT_FILE="$XCODE_WORKSPACE"
+            echo "Using workspace: $PROJECT_FILE"
+          elif [ -f "SweetTown.xcodeproj" ]; then
+            PROJECT_FILE="SweetTown.xcodeproj"
+            echo "Using project: $PROJECT_FILE"
+          else
+            echo "Error: No .xcworkspace or .xcodeproj found"
+            exit 1
+          fi
+          
+          # Применяем профили подписи
+          xcode-project use-profiles
+      
       - name: Build IPA
         script: |
-          if [ -f "SweetTown.xcworkspace" ]; then
+          # Определяем тип проекта и собираем
+          if [ -f "$XCODE_WORKSPACE" ]; then
+            echo "Building with workspace..."
             xcode-project build-ipa \
-              --workspace "SweetTown.xcworkspace" \
-              --scheme "SweetTown" \
-              --config "Release"
+              --workspace "$XCODE_WORKSPACE" \
+              --scheme "$XCODE_SCHEME" \
+              --config "Release" \
+              --export-method app-store
           else
+            echo "Building with project..."
             xcode-project build-ipa \
               --project "SweetTown.xcodeproj" \
-              --scheme "SweetTown" \
-              --config "Release"
+              --scheme "$XCODE_SCHEME" \
+              --config "Release" \
+              --export-method app-store
           fi
-
+      
+      - name: Verify build artifacts
+        script: |
+          echo "Checking build artifacts..."
+          find $CM_BUILD_DIR -name "*.ipa" -type f
+          ls -la build/ios/ipa/ 2>/dev/null || echo "No ipa directory found"
+    
     artifacts:
       - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
       - /tmp/xcodebuild_logs/*.log
-      - /tmp/xcodebuild_archive/*.xcarchive
-
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Logs/**/*.xcactivitylog
+    
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        # submit_to_app_store: true
+        # submit_to_app_store: true  # Раскомментируйте для публикации в App Store
