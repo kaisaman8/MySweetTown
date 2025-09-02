@@ -48,6 +48,15 @@ workflows:
           echo "=== Adding certificates to keychain ==="
           keychain add-certificates
           
+          # Создаем дополнительно Distribution профили, если их нет
+          echo "=== Creating additional distribution profiles ==="
+          app-store-connect fetch-signing-files "com.Workapp.SweetHome" \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --create \
+            --strict-match-identifier \
+            --verbose || echo "Failed to create distribution profiles"
+          
           # Переходим в директорию проекта и применяем профили
           echo "=== Applying profiles ==="
           cd SweetHome
