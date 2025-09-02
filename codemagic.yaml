@@ -97,10 +97,26 @@ workflows:
           # --- Шаг 2: Подготовка к экспорту ---
           echo "=== Preparing for export ==="
           
-          # Находим UUID и имя профиля для App Store
-          PROVISIONING_PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles/ -name "*.mobileprovision" -print0 | xargs -0 grep -l "app-store")
+          # Находим правильный профиль для App Store
+          echo "=== Searching for App Store provisioning profile ==="
+          PROVISIONING_PROFILE_PATH=""
+          for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+              PROFILE_BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' /dev/stdin <<< $(security cms -D -i "$profile"))
+              # Убираем префикс TEAM_ID из Bundle ID профиля
+              PROFILE_BUNDLE_ID="${PROFILE_BUNDLE_ID#*.}"
+
+              # Проверяем, что это профиль дистрибуции (нет списка устройств)
+              if ! /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' /dev/stdin <<< $(security cms -D -i "$profile") >/dev/null 2>&1; then
+                  if [ "$PROFILE_BUNDLE_ID" == "$BUNDLE_ID" ]; then
+                      PROVISIONING_PROFILE_PATH="$profile"
+                      echo "Found matching App Store profile: $profile"
+                      break
+                  fi
+              fi
+          done
+
           if [ -z "$PROVISIONING_PROFILE_PATH" ]; then
-              echo "Error: App Store provisioning profile not found."
+              echo "Error: App Store provisioning profile for $BUNDLE_ID not found."
               exit 1
           fi
 
