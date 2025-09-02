@@ -13,12 +13,12 @@ workflows:
           source: true
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.Workapp.SweetHome
-        # Codemagic автоматически управляет сертификатами и профилями
+      # Переключаемся на manual signing
       vars:
         TEAM_ID: 7LSL6C96XJ
+        BUNDLE_ID: com.Workapp.SweetHome
+        # Указываем конкретные сертификаты
+        CODE_SIGN_IDENTITY: "Apple Distribution"
       xcode: latest
       
 
@@ -26,21 +26,82 @@ workflows:
       app_store_connect: "Codemagic API key"  # имя интеграции из Codemagic UI
 
     scripts:
+      - name: Check signing setup
+        script: |
+          # Проверяем доступные сертификаты
+          echo "=== Available certificates ==="
+          security find-identity -v -p codesigning
+          
+          # Проверяем App Store Connect интеграцию
+          echo "=== App Store Connect status ==="
+          app-store-connect get-latest-app-store-build-number "com.Workapp.SweetHome" || echo "App not found in App Store Connect"
+
       - name: Fetch and install signing files
         script: |
-          app-store-connect fetch-signing-files "com.Workapp.SweetHome" --type IOS_APP_STORE --create
+          # Получаем сертификаты и профили для App Store с автосозданием
+          echo "=== Fetching signing files with auto-create ==="
+          app-store-connect fetch-signing-files "com.Workapp.SweetHome" \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --create \
+            --verbose
+          
+          # Добавляем сертификаты в keychain
+          echo "=== Adding certificates to keychain ==="
           keychain add-certificates
+          
+          # Переходим в директорию проекта и применяем профили
+          echo "=== Applying profiles ==="
           cd SweetHome
           xcode-project use-profiles --team-id $TEAM_ID
+          
+          # Проверяем доступные профили
+          echo "=== Available provisioning profiles ==="
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No local profiles found"
+          
+          # Проверяем настройки проекта
+          echo "=== Project signing settings ==="
+          xcodebuild -project "SweetTown.xcodeproj" -scheme "SweetTown" -showBuildSettings | grep -E "(CODE_SIGN|PROVISIONING_PROFILE|DEVELOPMENT_TEAM)"
 
       - name: Build iOS app (Release, App Store)
         script: |
           cd SweetHome
-          xcode-project build-ipa \
-            --project "SweetTown.xcodeproj" \
-            --scheme "SweetTown" \
-            --config "Release" \
-            --export-method app-store
+          
+          # Сборка с manual signing и явными параметрами
+          echo "=== Building with manual code signing ==="
+          xcodebuild \
+            -project "SweetTown.xcodeproj" \
+            -scheme "SweetTown" \
+            -configuration "Release" \
+            -destination "generic/platform=iOS" \
+            -archivePath "build/SweetTown.xcarchive" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY" \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            archive
+          
+          # Экспорт в IPA
+          echo "=== Exporting to IPA ==="
+          xcodebuild \
+            -exportArchive \
+            -archivePath "build/SweetTown.xcarchive" \
+            -exportPath "build/ios/ipa" \
+            -exportOptionsPlist /dev/stdin <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+          </dict>
+          </plist>
+          EOF
 
     artifacts:
       - build/ios/ipa/*.ipa
