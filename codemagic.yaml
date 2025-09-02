@@ -37,7 +37,7 @@ workflows:
             --scheme "SweetTown"
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - SweetHome/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - /tmp/xcodebuild_archive/*.xcarchive
 
