@@ -16,6 +16,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.Workapp.SweetHome
+        team_id: 7LSL6C96XJ
         # Codemagic автоматически управляет сертификатами и профилями
       xcode: latest
       
