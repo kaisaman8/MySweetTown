@@ -26,22 +26,21 @@ workflows:
       app_store_connect: "Codemagic API key"  # имя интеграции из Codemagic UI
 
     scripts:
-      - name: Set up code signing settings on Xcode project
+      - name: Fetch and install signing files
         script: |
-          # Переходим в директорию проекта
+          app-store-connect fetch-signing-files "com.Workapp.SweetHome" --type IOS_APP_STORE --create
+          keychain add-certificates
           cd SweetHome
-          # Устанавливаем Team ID для проекта
           xcode-project use-profiles --team-id $TEAM_ID
-      
-      - name: Build iOS app
+
+      - name: Build iOS app (Release, App Store)
         script: |
-          # Переходим в директорию проекта
           cd SweetHome
-          # Указываем проект явно
           xcode-project build-ipa \
             --project "SweetTown.xcodeproj" \
             --scheme "SweetTown" \
-            --config "Release"
+            --config "Release" \
+            --export-method app-store
 
     artifacts:
       - build/ios/ipa/*.ipa
