@@ -3,7 +3,7 @@ workflows:
     name: iOS Build
     instance_type: mac_mini_m1
     max_build_duration: 60
-    
+
     triggering:
       events:
         - push
@@ -11,117 +11,44 @@ workflows:
         - pattern: main
           include: true
           source: true
-    
-    integrations:
-      app_store_connect: "Codemagic API key"
-    
+
     environment:
-      vars:
-        DEVELOPMENT_TEAM: $DEVELOPMENT_TEAM
-        APP_IDENTIFIER: com.Workapp.SweetHome
-        BUNDLE_ID: com.Workapp.SweetHome
-        XCODE_PROJECT: "SweetHome/SweetTown.xcodeproj"
-        XCODE_SCHEME: "SweetTown"
-      
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.Workapp.SweetHome
-      
+        # Codemagic автоматически управляет сертификатами и профилями
       xcode: latest
-      cocoapods: default
-    
+      
+
+    integrations:
+      app_store_connect: "Codemagic API key"  # имя интеграции из Codemagic UI
+
     scripts:
-      - name: Install dependencies
-        script: |
-          # Обновляем gem и устанавливаем зависимости
-          sudo gem install xcodeproj -v '>=1.8' || true
-          
-          # Переходим в директорию проекта для проверки Podfile
-          cd SweetHome
-          
-          # Устанавливаем CocoaPods зависимости
-          if [ -f "Podfile" ]; then
-            echo "Installing CocoaPods dependencies..."
-            pod install --repo-update --clean-install
-          else
-            echo "No Podfile found in SweetHome directory, skipping CocoaPods installation"
-          fi
-          
-          # Возвращаемся в корневую директорию
-          cd ..
-      
-      - name: Setup Xcode project
+      - name: Set up code signing settings on Xcode project
         script: |
           # Переходим в директорию проекта
           cd SweetHome
-          
-          # Проверяем наличие проекта
-          if [ -f "SweetTown.xcodeproj/project.pbxproj" ]; then
-            PROJECT_FILE="SweetTown.xcodeproj"
-            echo "Using project: $PROJECT_FILE"
-          else
-            echo "Error: SweetTown.xcodeproj not found"
-            exit 1
-          fi
-          
-          # Выводим отладочную информацию
-          echo "=== DEBUG INFO ==="
-          echo "DEVELOPMENT_TEAM: $DEVELOPMENT_TEAM"
-          echo "APP_IDENTIFIER: $APP_IDENTIFIER"
-          echo "BUNDLE_ID: $BUNDLE_ID"
-          echo "Available provisioning profiles:"
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "No profiles directory found"
-          
-          # Настраиваем команду разработчика если она задана
-          if [ ! -z "$DEVELOPMENT_TEAM" ]; then
-            echo "Setting development team to: $DEVELOPMENT_TEAM"
-            sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = \"$DEVELOPMENT_TEAM\";/g" "$PROJECT_FILE/project.pbxproj"
-            
-            # Включаем автоматическое управление подписанием
-            echo "Enabling automatic code signing..."
-            sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Automatic;/g" "$PROJECT_FILE/project.pbxproj"
-            sed -i '' "s/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g" "$PROJECT_FILE/project.pbxproj"
-            
-            # Устанавливаем правильный bundle identifier
-            sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.Workapp.SweetHome;/g" "$PROJECT_FILE/project.pbxproj"
-          else
-            echo "WARNING: DEVELOPMENT_TEAM is empty!"
-          fi
-          
-          # Проверяем доступные профили в Codemagic
-          echo "Codemagic provisioning profiles:"
-          find /Users/builder -name "*.mobileprovision" 2>/dev/null || echo "No mobileprovision files found"
-          
-          # Применяем профили подписи
-          xcode-project use-profiles || echo "Warning: use-profiles failed, continuing with automatic signing"
+          # Codemagic автоматически применяет настройки подписания
+          xcode-project use-profiles
       
-      - name: Build IPA
+      - name: Build iOS app
         script: |
           # Переходим в директорию проекта
           cd SweetHome
-          
-          # Собираем проект
-          echo "Building with project: SweetTown.xcodeproj"
+          # Указываем проект явно
           xcode-project build-ipa \
             --project "SweetTown.xcodeproj" \
-            --scheme "$XCODE_SCHEME" \
-            --config "Release" \
-            --export-method app-store
-      
-      - name: Verify build artifacts
-        script: |
-          echo "Checking build artifacts..."
-          find $CM_BUILD_DIR -name "*.ipa" -type f
-          ls -la build/ios/ipa/ 2>/dev/null || echo "No ipa directory found"
-    
+            --scheme "SweetTown" \
+            --config "Release"
+
     artifacts:
       - build/ios/ipa/*.ipa
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
       - /tmp/xcodebuild_logs/*.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Logs/**/*.xcactivitylog
-    
+      - /tmp/xcodebuild_archive/*.xcarchive
+
     publishing:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        # submit_to_app_store: true  # Раскомментируйте для публикации в App Store
+        # Закомментируйте submit_to_app_store пока не готовы к релизу
+        # submit_to_app_store: true
