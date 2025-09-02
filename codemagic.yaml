@@ -16,8 +16,9 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.Workapp.SweetHome
-        team_id: 7LSL6C96XJ
         # Codemagic автоматически управляет сертификатами и профилями
+      vars:
+        TEAM_ID: 7LSL6C96XJ
       xcode: latest
       
 
@@ -29,8 +30,8 @@ workflows:
         script: |
           # Переходим в директорию проекта
           cd SweetHome
-          # Codemagic автоматически применяет настройки подписания
-          xcode-project use-profiles
+          # Устанавливаем Team ID для проекта
+          xcode-project use-profiles --team-id $TEAM_ID
       
       - name: Build iOS app
         script: |
