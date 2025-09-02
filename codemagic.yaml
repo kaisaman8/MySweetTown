@@ -13,12 +13,10 @@ workflows:
           source: true
 
     environment:
-      # Переключаемся на manual signing
+      # Используем automatic signing
       vars:
         TEAM_ID: 7LSL6C96XJ
         BUNDLE_ID: com.Workapp.SweetHome
-        # Указываем конкретные сертификаты
-        CODE_SIGN_IDENTITY: "Apple Distribution"
       xcode: latest
       
 
