@@ -12,28 +12,46 @@ workflows:
           include: true
           source: true
 
-    environment:
-      vars:
-        DEVELOPMENT_TEAM: $CM_TEAM_ID
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.Workapp.SweetHome
-      xcode: latest
-      
     integrations:
       app_store_connect: "Codemagic API key"
 
+    environment:
+      vars:
+        DEVELOPMENT_TEAM: $DEVELOPMENT_TEAM
+        APP_IDENTIFIER: com.Workapp.SweetHome
+
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: $APP_IDENTIFIER
+
+      xcode: latest
+      cocoapods: default
+
     scripts:
-      - name: Set up code signing settings on Xcode project
+      - name: Install dependencies
         script: |
-          xcode-project use-profiles
-      
-      - name: Build iOS app
+          sudo gem install xcodeproj -v '>=1.8' || true
+          if [ -f "Podfile" ]; then
+            pod install --repo-update
+          fi
+
+      - name: Setup code signing
         script: |
-          xcode-project build-ipa \
-            --project "SweetTown.xcodeproj" \
-            --scheme "SweetTown" \
-            --config "Release"
+          xcode-project use-profiles --project "SweetTown.xcodeproj" --scheme "SweetTown"
+
+      - name: Build IPA
+        script: |
+          if [ -f "SweetTown.xcworkspace" ]; then
+            xcode-project build-ipa \
+              --workspace "SweetTown.xcworkspace" \
+              --scheme "SweetTown" \
+              --config "Release"
+          else
+            xcode-project build-ipa \
+              --project "SweetTown.xcodeproj" \
+              --scheme "SweetTown" \
+              --config "Release"
+          fi
 
     artifacts:
       - build/ios/ipa/*.ipa
