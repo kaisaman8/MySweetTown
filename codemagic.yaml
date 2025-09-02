@@ -34,16 +34,13 @@ workflows:
           echo "=== App Store Connect status ==="
           app-store-connect get-latest-app-store-build-number "com.Workapp.SweetHome" || echo "App not found in App Store Connect"
 
-      - name: Fetch and install signing files
+      - name: Install signing files from Codemagic UI
         script: |
           set -e
-          echo "=== Fetching signing files for App Store ==="
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          
-          echo "=== Adding certificates to keychain ==="
+          echo "=== Installing signing assets from Codemagic UI ==="
           keychain add-certificates
-
-          echo "=== DIAGNOSTIC: Listing all provisioning profiles ==="
+          
+          echo "=== Verifying provisioning profiles are available ==="
           ls -lR ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Build and export iOS app
