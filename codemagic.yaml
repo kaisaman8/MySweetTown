@@ -21,7 +21,7 @@ workflows:
       
 
     integrations:
-      app_store_connect: "Manniste Kaisa"  # имя интеграции из Codemagic UI
+      app_store_connect: "test"  # имя интеграции из Codemagic UI
 
     scripts:
       - name: Check signing setup
