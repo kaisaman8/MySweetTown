@@ -82,7 +82,18 @@ workflows:
             PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
             archive
           
-          # Экспорт в IPA
+          # Проверяем созданные профили для экспорта
+          echo "=== Checking profiles after creation ==="
+          find ~/Library/MobileDevice/Provisioning\ Profiles/ -name "*.mobileprovision" -exec bash -c '
+            echo "=== Profile: $(basename "$1") ==="
+            PROFILE_INFO=$(security cms -D -i "$1")
+            echo "$PROFILE_INFO" | /usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin 2>/dev/null || echo "Failed to get name"
+            echo "$PROFILE_INFO" | /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" /dev/stdin 2>/dev/null || echo "No app identifier"
+            echo "$PROFILE_INFO" | /usr/libexec/PlistBuddy -c "Print :ProvisionedDevices" /dev/stdin 2>/dev/null | head -3 || echo "Distribution profile (no devices)"
+            echo ""
+          ' _ {} \; 2>/dev/null
+          
+          # Экспорт в IPA с исправленным методом
           echo "=== Exporting to IPA ==="
           xcodebuild \
             -exportArchive \
@@ -94,11 +105,15 @@ workflows:
           <plist version="1.0">
           <dict>
               <key>method</key>
-              <string>app-store</string>
+              <string>app-store-connect</string>
               <key>teamID</key>
               <string>$TEAM_ID</string>
               <key>signingStyle</key>
               <string>automatic</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
           </dict>
           </plist>
           EOF
