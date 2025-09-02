@@ -13,10 +13,11 @@ workflows:
           source: true
 
     environment:
+      vars:
+        DEVELOPMENT_TEAM: $CM_TEAM_ID
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.Workapp.SweetHome
-        team_id: $CM_TEAM_ID
       xcode: latest
       
     integrations:
