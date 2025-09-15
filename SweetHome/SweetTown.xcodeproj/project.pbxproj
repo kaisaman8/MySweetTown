@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8643085F2E7804F30050D1BB /* AdjustGoogleOdm in Frameworks */ = {isa = PBXBuildFile; productRef = 8643085E2E7804F30050D1BB /* AdjustGoogleOdm */; };
+		864308612E7804F30050D1BB /* AdjustSdk in Frameworks */ = {isa = PBXBuildFile; productRef = 864308602E7804F30050D1BB /* AdjustSdk */; };
+		864308632E7804F30050D1BB /* AdjustWebBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 864308622E7804F30050D1BB /* AdjustWebBridge */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		879C82A92E4B93120029559F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		864307DD2E77F97A0050D1BB /* SweetTown-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "SweetTown-Info.plist"; sourceTree = "<group>"; };
 		879C82982E4B93110029559F /* SweetTown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SweetTown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		879C82A82E4B93120029559F /* SweetTownTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SweetTownTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		879C82B22E4B93120029559F /* SweetTownUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SweetTownUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,6 +59,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				864308632E7804F30050D1BB /* AdjustWebBridge in Frameworks */,
+				864308612E7804F30050D1BB /* AdjustSdk in Frameworks */,
+				8643085F2E7804F30050D1BB /* AdjustGoogleOdm in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +85,7 @@
 		879C828F2E4B93110029559F = {
 			isa = PBXGroup;
 			children = (
+				864307DD2E77F97A0050D1BB /* SweetTown-Info.plist */,
 				879C829A2E4B93110029559F /* SweetHome */,
 				879C82AB2E4B93120029559F /* SweetHomeTests */,
 				879C82B52E4B93120029559F /* SweetHomeUITests */,
@@ -112,6 +123,9 @@
 			);
 			name = SweetTown;
 			packageProductDependencies = (
+				8643085E2E7804F30050D1BB /* AdjustGoogleOdm */,
+				864308602E7804F30050D1BB /* AdjustSdk */,
+				864308622E7804F30050D1BB /* AdjustWebBridge */,
 			);
 			productName = SweetHome;
 			productReference = 879C82982E4B93110029559F /* SweetTown.app */;
@@ -195,6 +209,9 @@
 			);
 			mainGroup = 879C828F2E4B93110029559F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8643085D2E7804F30050D1BB /* XCRemoteSwiftPackageReference "ios_sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 879C82992E4B93110029559F /* Products */;
 			projectDirPath = "";
@@ -400,6 +417,7 @@
 				DEVELOPMENT_TEAM = 7LSL6C96XJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SweetTown-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,13 +446,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SweetHome/Preview Content\"";
 				DEVELOPMENT_TEAM = 7LSL6C96XJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SweetTown-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -566,6 +585,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8643085D2E7804F30050D1BB /* XCRemoteSwiftPackageReference "ios_sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/adjust/ios_sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8643085E2E7804F30050D1BB /* AdjustGoogleOdm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8643085D2E7804F30050D1BB /* XCRemoteSwiftPackageReference "ios_sdk" */;
+			productName = AdjustGoogleOdm;
+		};
+		864308602E7804F30050D1BB /* AdjustSdk */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8643085D2E7804F30050D1BB /* XCRemoteSwiftPackageReference "ios_sdk" */;
+			productName = AdjustSdk;
+		};
+		864308622E7804F30050D1BB /* AdjustWebBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8643085D2E7804F30050D1BB /* XCRemoteSwiftPackageReference "ios_sdk" */;
+			productName = AdjustWebBridge;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 879C82902E4B93110029559F /* Project object */;
 }

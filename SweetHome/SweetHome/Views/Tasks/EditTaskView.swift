@@ -11,7 +11,7 @@ struct EditTaskView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var coreDataManager: CoreDataManager
     
-    let task: Task
+    let task: Tasks
     
     @State private var title = ""
     @State private var description = ""
@@ -127,7 +127,7 @@ struct EditTaskView: View {
 
 #Preview {
     let context = CoreDataManager.shared.context
-    let sampleTask = Task(context: context)
+    let sampleTask = Tasks(context: context)
     sampleTask.title = "Sample Task"
     sampleTask.taskDescription = "This is a sample task"
     sampleTask.priority = "medium"

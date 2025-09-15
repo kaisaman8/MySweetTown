@@ -62,7 +62,7 @@ class ExportImportService {
     func exportData(context: NSManagedObjectContext) -> Data? {
         do {
             // Fetch all data
-            let tasks = try context.fetch(Task.fetchRequest()) as [Task]
+            let tasks = try context.fetch(Tasks.fetchRequest()) as [Tasks]
             let sweets = try context.fetch(Sweet.fetchRequest()) as [Sweet]
             let settings = try context.fetch(AppSettings.fetchRequest()) as [AppSettings]
             let streaks = try context.fetch(Streak.fetchRequest()) as [Streak]
@@ -158,7 +158,7 @@ class ExportImportService {
             
             // Import tasks
             for taskData in importData.tasks {
-                let task = Task(context: context)
+                let task = Tasks(context: context)
                 task.id = taskData.id
                 task.title = taskData.title
                 task.taskDescription = taskData.taskDescription
@@ -190,7 +190,7 @@ class ExportImportService {
             }
             
             // Import completion history
-            let tasks = try context.fetch(Task.fetchRequest()) as [Task]
+            let tasks = try context.fetch(Tasks.fetchRequest()) as [Tasks]
             let taskDict = Dictionary(uniqueKeysWithValues: tasks.map { ($0.id!, $0) })
             
             for completionData in importData.completionHistory {

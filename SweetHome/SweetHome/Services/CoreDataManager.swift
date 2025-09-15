@@ -38,8 +38,8 @@ class CoreDataManager: ObservableObject {
     
     // MARK: - Task Operations
     
-    func createTask(title: String, description: String, category: String?, priority: String, recurrenceType: String) -> Task {
-        let task = Task(context: context)
+    func createTask(title: String, description: String, category: String?, priority: String, recurrenceType: String) -> Tasks {
+        let task = Tasks(context: context)
         task.id = UUID()
         task.title = title
         task.taskDescription = description
@@ -53,7 +53,7 @@ class CoreDataManager: ObservableObject {
         return task
     }
     
-    func completeTask(_ task: Task) {
+    func completeTask(_ task: Tasks) {
         task.isCompleted = true
         task.lastCompletedDate = Date()
         
@@ -78,7 +78,7 @@ class CoreDataManager: ObservableObject {
         save()
     }
     
-    func deleteTask(_ task: Task) {
+    func deleteTask(_ task: Tasks) {
         context.delete(task)
         save()
     }

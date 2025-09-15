@@ -23,9 +23,9 @@ struct CityView: View {
     private var streaks: FetchedResults<Streak>
     
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.isCompleted, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Tasks.isCompleted, ascending: true)],
         animation: .default)
-    private var tasks: FetchedResults<Task>
+    private var tasks: FetchedResults<Tasks>
     
     @State private var showingNewSweetAnimation = false
     @State private var showingHowItWorks = false

@@ -13,9 +13,9 @@ struct ContentView: View {
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
     
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.createdDate, ascending: false)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Tasks.createdDate, ascending: false)],
         animation: .default)
-    private var tasks: FetchedResults<Task>
+    private var tasks: FetchedResults<Tasks>
     
     var body: some View {
         Group {
