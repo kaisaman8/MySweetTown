@@ -14,11 +14,11 @@ struct TasksView: View {
     
     @FetchRequest(
         sortDescriptors: [
-            NSSortDescriptor(keyPath: \Task.isCompleted, ascending: true),
-            NSSortDescriptor(keyPath: \Task.createdDate, ascending: false)
+            NSSortDescriptor(keyPath: \Tasks.isCompleted, ascending: true),
+            NSSortDescriptor(keyPath: \Tasks.createdDate, ascending: false)
         ],
         animation: .default)
-    private var tasks: FetchedResults<Task>
+    private var tasks: FetchedResults<Tasks>
     
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Streak.currentStreak, ascending: false)],
@@ -30,11 +30,11 @@ struct TasksView: View {
     @State private var completedTaskId: UUID?
     @State private var showingMotivation = false
     
-    var incompleteTasks: [Task] {
+    var incompleteTasks: [Tasks] {
         tasks.filter { !$0.isCompleted }
     }
     
-    var completedTasks: [Task] {
+    var completedTasks: [Tasks] {
         tasks.filter { $0.isCompleted }
     }
     
@@ -256,7 +256,7 @@ struct TasksView: View {
         }
     }
     
-    private func completeTask(_ task: Task) {
+    private func completeTask(_ task: Tasks) {
         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
             coreDataManager.completeTask(task)
             completedTaskId = task.id
@@ -286,8 +286,8 @@ struct TasksView: View {
 }
 
 struct TaskRowView: View {
-    let task: Task
-    let onComplete: ((Task) -> Void)?
+    let task: Tasks
+    let onComplete: ((Tasks) -> Void)?
     
     @State private var showingEditTask = false
     

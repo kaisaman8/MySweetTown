@@ -275,9 +275,9 @@ struct StatisticsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.createdDate, ascending: false)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Tasks.createdDate, ascending: false)],
         animation: .default)
-    private var tasks: FetchedResults<Task>
+    private var tasks: FetchedResults<Tasks>
     
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Sweet.earnedDate, ascending: false)],

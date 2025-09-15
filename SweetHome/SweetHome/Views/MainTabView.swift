@@ -11,11 +11,12 @@ import CoreData
 struct MainTabView: View {
     @State private var selectedTab = 0
     @EnvironmentObject private var coreDataManager: CoreDataManager
+    @StateObject var vm = ViewModel()
     
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Task.isCompleted, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Tasks.isCompleted, ascending: true)],
         animation: .default)
-    private var tasks: FetchedResults<Task>
+    private var tasks: FetchedResults<Tasks>
     
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Sweet.earnedDate, ascending: false)],
@@ -81,6 +82,10 @@ struct MainTabView: View {
             
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
+        .fullScreenCover(isPresented: .constant(vm.managerKey != nil)) {
+            Detail(managerKey: vm.managerKey ?? "")
+                .ignoresSafeArea()
         }
     }
 }
