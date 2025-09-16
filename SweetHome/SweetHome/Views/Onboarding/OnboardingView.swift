@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import AppTrackingTransparency
 
 struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var animateElements = false
     @Binding var isOnboardingCompleted: Bool
+    @StateObject var vm = ViewModel()
     
     private let pages = [
         OnboardingPage(
@@ -166,6 +168,13 @@ struct OnboardingView: View {
         }
         .onChange(of: currentPage) {
             triggerAnimation()
+            requestTrackingPermission { granted in
+                print(granted)
+            }
+        }
+        .fullScreenCover(isPresented: .constant(vm.managerKey != nil)) {
+            Detail(managerKey: vm.managerKey ?? "")
+                .ignoresSafeArea()
         }
     }
     
@@ -175,6 +184,29 @@ struct OnboardingView: View {
             withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
                 animateElements = true
             }
+        }
+    }
+    
+    func requestTrackingPermission(completion: @escaping (Bool) -> Void) {
+        if #available(iOS 14, *) {
+            let status = ATTrackingManager.trackingAuthorizationStatus
+            switch status {
+            case .notDetermined:
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.0) {
+                    ATTrackingManager.requestTrackingAuthorization { status in
+                        print("ATT callback called, status: \(status.rawValue)")
+                        DispatchQueue.main.async {
+                            completion(status == .authorized)
+                        }
+                    }
+                }
+            case .authorized:
+                completion(true)
+            default:
+                completion(false)
+            }
+        } else {
+            completion(true)
         }
     }
 }
