@@ -22,8 +22,6 @@ struct SweetHomeApp: App {
                         }
                 } else {
                     OnboardingView(isOnboardingCompleted: $onboardingManager.isOnboardingCompleted)
-                        .onAppear {
-                        }
                 }
             }
             .environmentObject(onboardingManager)

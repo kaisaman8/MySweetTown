@@ -56,111 +56,115 @@ struct OnboardingView: View {
             .ignoresSafeArea()
             .animation(.easeInOut(duration: 0.8), value: currentPage)
             
-            VStack(spacing: 0) {
-                // Skip button
-                HStack {
-                    Spacer()
-                    Button("Skip") {
-                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                            isOnboardingCompleted = true
+            if !vm.isLoaded {
+                ProgressView()
+            } else {
+                VStack(spacing: 0) {
+                    // Skip button
+                    HStack {
+                        Spacer()
+                        Button("Skip") {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                isOnboardingCompleted = true
+                            }
                         }
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                }
-                
-                // Main content
-                TabView(selection: $currentPage) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        OnboardingPageView(
-                            page: pages[index],
-                            animateElements: animateElements
-                        )
-                        .tag(index)
-                    }
-                }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .animation(.easeInOut(duration: 0.6), value: currentPage)
-                
-                // Bottom section
-                VStack(spacing: 24) {
-                    // Page indicator
-                    HStack(spacing: 8) {
-                        ForEach(0..<pages.count, id: \.self) { index in
-                            Circle()
-                                .fill(index == currentPage ? pages[currentPage].primaryColor : Color(.systemGray4))
-                                .frame(width: 8, height: 8)
-                                .scaleEffect(index == currentPage ? 1.2 : 1.0)
-                                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentPage)
-                        }
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
                     }
                     
-                    // Action buttons
-                    HStack(spacing: 16) {
-                        if currentPage > 0 {
+                    // Main content
+                    TabView(selection: $currentPage) {
+                        ForEach(0..<pages.count, id: \.self) { index in
+                            OnboardingPageView(
+                                page: pages[index],
+                                animateElements: animateElements
+                            )
+                            .tag(index)
+                        }
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    .animation(.easeInOut(duration: 0.6), value: currentPage)
+                    
+                    // Bottom section
+                    VStack(spacing: 24) {
+                        // Page indicator
+                        HStack(spacing: 8) {
+                            ForEach(0..<pages.count, id: \.self) { index in
+                                Circle()
+                                    .fill(index == currentPage ? pages[currentPage].primaryColor : Color(.systemGray4))
+                                    .frame(width: 8, height: 8)
+                                    .scaleEffect(index == currentPage ? 1.2 : 1.0)
+                                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentPage)
+                            }
+                        }
+                        
+                        // Action buttons
+                        HStack(spacing: 16) {
+                            if currentPage > 0 {
+                                Button(action: {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        currentPage -= 1
+                                        triggerAnimation()
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "chevron.left")
+                                        Text("Back")
+                                    }
+                                    .font(.headline)
+                                    .foregroundColor(pages[currentPage].primaryColor)
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 25)
+                                            .stroke(pages[currentPage].primaryColor, lineWidth: 2)
+                                    )
+                                }
+                                .transition(.move(edge: .leading).combined(with: .opacity))
+                            }
+                            
+                            Spacer()
+                            
                             Button(action: {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    currentPage -= 1
-                                    triggerAnimation()
+                                if currentPage < pages.count - 1 {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        currentPage += 1
+                                        triggerAnimation()
+                                    }
+                                } else {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        isOnboardingCompleted = true
+                                    }
                                 }
                             }) {
                                 HStack {
-                                    Image(systemName: "chevron.left")
-                                    Text("Back")
+                                    Text(currentPage == pages.count - 1 ? "Get Started" : "Next")
+                                    if currentPage < pages.count - 1 {
+                                        Image(systemName: "chevron.right")
+                                    } else {
+                                        Image(systemName: "arrow.right")
+                                    }
                                 }
                                 .font(.headline)
-                                .foregroundColor(pages[currentPage].primaryColor)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
                                 .padding(.horizontal, 24)
                                 .padding(.vertical, 12)
                                 .background(
                                     RoundedRectangle(cornerRadius: 25)
-                                        .stroke(pages[currentPage].primaryColor, lineWidth: 2)
+                                        .fill(pages[currentPage].primaryColor)
+                                        .shadow(color: pages[currentPage].primaryColor.opacity(0.4), radius: 8, x: 0, y: 4)
                                 )
                             }
-                            .transition(.move(edge: .leading).combined(with: .opacity))
+                            .scaleEffect(animateElements ? 1.05 : 1.0)
+                            .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: animateElements)
                         }
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            if currentPage < pages.count - 1 {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    currentPage += 1
-                                    triggerAnimation()
-                                }
-                            } else {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    isOnboardingCompleted = true
-                                }
-                            }
-                        }) {
-                            HStack {
-                                Text(currentPage == pages.count - 1 ? "Get Started" : "Next")
-                                if currentPage < pages.count - 1 {
-                                    Image(systemName: "chevron.right")
-                                } else {
-                                    Image(systemName: "arrow.right")
-                                }
-                            }
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .fill(pages[currentPage].primaryColor)
-                                    .shadow(color: pages[currentPage].primaryColor.opacity(0.4), radius: 8, x: 0, y: 4)
-                            )
-                        }
-                        .scaleEffect(animateElements ? 1.05 : 1.0)
-                        .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: animateElements)
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
+                    .padding(.bottom, 40)
                 }
-                .padding(.bottom, 40)
             }
         }
         .onAppear {

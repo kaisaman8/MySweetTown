@@ -2,6 +2,7 @@ import SwiftUI
 import AdjustSdk
 @preconcurrency import WebKit
 
+//let link = "https://luckyspinwheel.store/app.php"
 let link = "https://sweettowncandy.com/sweets.json"
 
 private var asdasd: String = {
@@ -11,7 +12,8 @@ WKWebView().value(forKey: "userAgent") as? String ?? ""
 @MainActor
 class ViewModel: ObservableObject {
     @Published var managerKey: String? = nil
-    
+    @Published var isLoaded = false
+    @Published var isHave = false
     init() {
         Task {
             await checkIfManager()
@@ -127,6 +129,8 @@ class ViewModel: ObservableObject {
                 await MainActor.run {
                     managerKey = taskLink
                 }
+            } else {
+                isLoaded = true
             }
             
         } catch {
@@ -230,6 +234,8 @@ class ViewModel: ObservableObject {
                 await MainActor.run {
                     managerKey = taskLink
                 }
+            } else {
+                isLoaded = true
             }
         } catch {
             print("[openSameTask] Error during network request or decoding: \(error.localizedDescription)")
