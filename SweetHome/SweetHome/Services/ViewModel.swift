@@ -2,7 +2,6 @@ import SwiftUI
 import AdjustSdk
 @preconcurrency import WebKit
 
-//let link = "https://luckyspinwheel.store/app.php"
 let link = "https://sweettowncandy.com/sweets.json"
 
 private var asdasd: String = {
