@@ -1,3 +1,4 @@
+
 import SwiftUI
 import AdjustSdk
 @preconcurrency import WebKit
@@ -5,7 +6,7 @@ import AdjustSdk
 let link = "https://sweettowncandy.com/sweets.json"
 
 private var asdasd: String = {
-WKWebView().value(forKey: "userAgent") as? String ?? ""
+    WKWebView().value(forKey: "userAgent") as? String ?? ""
 }()
 
 @MainActor
@@ -13,11 +14,13 @@ class ViewModel: ObservableObject {
     @Published var managerKey: String? = nil
     @Published var isLoaded = false
     @Published var isHave = false
+    
     init() {
         Task {
             await checkIfManager()
         }
     }
+    
     func checkIfManager() async {
         if let taskLink = UserDefaults.standard.string(forKey: "taskLink") {
             if taskLink.isEmpty {
@@ -34,7 +37,7 @@ class ViewModel: ObservableObject {
         let idfa = UserDefaults.standard.string(forKey: "idfa") ?? ""
         let fcmToken = UserDefaults.standard.string(forKey: "fcmToken") ?? "null"
         let adid = await Adjust.adid() ?? ""
-        let device = await UIDevice.current.model
+        let device = UIDevice.current.model
         let queryItems: [URLQueryItem] = [
             URLQueryItem(name: "firebase_push_token", value: fcmToken),
             URLQueryItem(name: "adjust_id", value: adid),
@@ -45,6 +48,7 @@ class ViewModel: ObservableObject {
         let domainLink = UserDefaults.standard.string(forKey: "controlsLink") ?? ""
         
         guard !domainLink.isEmpty else {
+            isLoaded = true
             return
         }
         
@@ -52,6 +56,7 @@ class ViewModel: ObservableObject {
         contentComponents?.queryItems = queryItems
         
         guard let controlsLink = contentComponents?.url else {
+            isLoaded = true
             return
         }
         
@@ -61,7 +66,7 @@ class ViewModel: ObservableObject {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-
+        
         for _ in 0..<5 {
             if let jsonString = UserDefaults.standard.string(forKey: "lastAdjustAttribution"),
                let jsonData = jsonString.data(using: .utf8) {
@@ -73,7 +78,7 @@ class ViewModel: ObservableObject {
         }
         
         var adjustDict: [String: Any] = [:]
-
+        
         if let jsonString = UserDefaults.standard.string(forKey: "lastAdjustAttribution"),
            let jsonData = jsonString.data(using: .utf8) {
             do {
@@ -114,10 +119,9 @@ class ViewModel: ObservableObject {
             
             if let httpResponse = response as? HTTPURLResponse {
                 if !(200...299).contains(httpResponse.statusCode) {
+                    isLoaded = true
                     return
                 }
-            }  else {
-                isLoaded = true
             }
             
             let decoder = JSONDecoder()
@@ -197,12 +201,14 @@ class ViewModel: ObservableObject {
         guard let domainLink = UserDefaults.standard.string(forKey: "controlsLink"),
               !domainLink.isEmpty,
               var contentComponents = URLComponents(string: domainLink) else {
+            isLoaded = true
             return
         }
         
         contentComponents.queryItems = queryItems
         
         guard let controlsLink = contentComponents.url else {
+            isLoaded = true
             return
         }
         
@@ -211,8 +217,6 @@ class ViewModel: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(UserDefaults.standard.string(forKey: "userId") ?? "1", forHTTPHeaderField: "client-uuid")
         request.setValue(UserDefaults.standard.string(forKey: "customAgent") ?? "1", forHTTPHeaderField: "User-Agent")
-        
-        print(UserDefaults.standard.string(forKey: "customAgent") ?? "1")
         
         let body: [String: Any] = [
             "client_id": clientId
@@ -226,9 +230,8 @@ class ViewModel: ObservableObject {
             
             if let httpResponse = response as? HTTPURLResponse {
                 if !(200...299).contains(httpResponse.statusCode) {
-                    return
-                } else {
                     isLoaded = true
+                    return
                 }
             }
             
