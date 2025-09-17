@@ -18,9 +18,7 @@ struct SweetHomeApp: App {
                         .environmentObject(coreDataManager)
                         .onAppear {
                             coreDataManager.createDemoData()
-                            requestTrackingPermission { granted in
-                                print(granted)
-                            }
+                         
                         }
                 } else {
                     OnboardingView(isOnboardingCompleted: $onboardingManager.isOnboardingCompleted)
@@ -29,33 +27,14 @@ struct SweetHomeApp: App {
             .environmentObject(onboardingManager)
         }
     }
-    
-    func requestTrackingPermission(completion: @escaping (Bool) -> Void) {
-        if #available(iOS 14, *) {
-            let status = ATTrackingManager.trackingAuthorizationStatus
-            switch status {
-            case .notDetermined:
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.0) {
-                    ATTrackingManager.requestTrackingAuthorization { status in
-                        print("ATT callback called, status: \(status.rawValue)")
-                        DispatchQueue.main.async {
-                            completion(status == .authorized)
-                        }
-                    }
-                }
-            case .authorized:
-                completion(true)
-            default:
-                completion(false)
-            }
-        } else {
-            completion(true)
-        }
-    }
+
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     let adjustHandler = AdjustHandler()
+    
+    
+
     
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
@@ -98,7 +77,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Failed to register for remote notifications: \(error.localizedDescription)")
     }
 }
 
