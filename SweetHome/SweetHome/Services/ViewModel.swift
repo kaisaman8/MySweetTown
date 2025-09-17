@@ -116,6 +116,8 @@ class ViewModel: ObservableObject {
                 if !(200...299).contains(httpResponse.statusCode) {
                     return
                 }
+            }  else {
+                isLoaded = true
             }
             
             let decoder = JSONDecoder()
@@ -153,6 +155,8 @@ class ViewModel: ObservableObject {
                 if let headerString = httpResponse.allHeaderFields["service-link"] as? String {
                     return headerString
                 }
+            } else {
+                isLoaded = true
             }
         } catch {
             print("Error: \(error.localizedDescription)")
@@ -169,6 +173,7 @@ class ViewModel: ObservableObject {
         }
         
         guard let response = await setupManagerContent() else {
+            isLoaded = true
             return
         }
         
@@ -222,6 +227,8 @@ class ViewModel: ObservableObject {
             if let httpResponse = response as? HTTPURLResponse {
                 if !(200...299).contains(httpResponse.statusCode) {
                     return
+                } else {
+                    isLoaded = true
                 }
             }
             
